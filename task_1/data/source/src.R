@@ -24,9 +24,13 @@ v3 = v1[-v2]
 cultivos = import("task_1/data/input/cultivos.xlsx", sheet="CultivosIlicitos", col_names = T, range="A9:Y362")
 
 # DUDA: Podriamos cambiarlo para que quite todas las filas con na
-cultivos = cultivos %>% drop_na(CODDEPTO, DEPARTAMENTO, CODMPIO, MUNICIPIO)
+cultivos = cultivos %>% drop_na()
 skim(cultivos)
 
+# Pivotear a formato long
+cultivos = cultivos %>% pivot_longer(cols=num_range('', 1999:2019), names_to = "ANIO",
+                                     names_transform = list(ANIO = as.integer), values_to = "HECTAREAS")
+skim(cultivos)
 # -----------------------------------------
 
 
@@ -42,8 +46,24 @@ ftrabajo = import("task_1/data/input/2019/Cabecera - Fuerza de trabajo.rds")
 
 # TODO: (Nombre) - Crear variables indicadoras para ocupados, desocupados, inactivos y fuerza de trabajo
 
+ocupados = bind_cols(ocupados, list(OCUPADO=1))
+desocupados = bind_cols(ocupados, list(DESOCUPADO=1))
+inactivos = bind_cols(ocupados, list(INACTIVO=1))
+ftrabajo = bind_cols(ocupados, list(FUERZA_TRABAJO=1))
 # TODO: (Nombre) - Unir las bases de datos usando secuencia_p, orden y directorio como identificadores
+completo = left_join(general, ocupados, by=c("secuencia_p", "orden", "directorio"), suffix=c('', '.y'))
+completo = left_join(completo, desocupados, by=c("secuencia_p", "orden", "directorio"), suffix=c('', '.y'))
+completo = left_join(completo, inactivos, by=c("secuencia_p", "orden", "directorio"), suffix=c('', '.y'))
+completo = left_join(completo, ftrabajo, by=c("secuencia_p", "orden", "directorio"), suffix=c('', '.y'))
 
+# Faltan las columnas P6030S1, P6440, P6450
+completo = completo %>% select(c(secuencia_p, orden, directorio, P6020, P6040 
+                                 , P6920, INGLABO, dpto, fex_c_2011, ESC, mes, P6050,
+                                 OCUPADO, DESOCUPADO, INACTIVO, FUERZA_TRABAJO))
+
+# Falta reemplazar NA values por 0s
+
+# thing = completo %>% mutate(OCUPADO = ifelse(p6020 == 1, "Hombre","Mujer"), p6160 = ifelse(p6160 == 1, "Lee","No Lee"))
 # TODO: (Nombre) - Generar 3 tablas con estadisticas descriptivas para la base de datos
 
 # TODO: (Nombre) - Generar 3 tablas con estadisticas descriptivas para la base de datos
