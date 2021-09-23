@@ -2,11 +2,14 @@
 # Elaborado por: Angelica Alvarez, Sebastian Marin y Alejandro Acelas
 # 
 
+#configuración inicial
+rm(list = ls()) #limpiamos el entorno de R
+
 # Importamos los paquetes necesarios
 library(rio)
 library(skimr)
 library(tidyverse)
-rm(list = ls())
+p_load(tidyverse , rio , skimr , RColorBrewer , ggthemes , hrbrthemes , igraph)
 
 # -----------------------------------------
 
